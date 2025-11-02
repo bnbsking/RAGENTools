@@ -11,7 +11,7 @@ class PDFParser(BaseParser):
                 text = page.get_text()
                 yield (page_num, text)
 
-    def parse(self, file_path: str) -> List[ChunkRecord]:
+    def parse_one(self, file_path: str) -> List[ChunkRecord]:
         records = []
         for page_num, text in self.pdf_page_text_generator(file_path):
             if not text.strip():

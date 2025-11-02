@@ -35,7 +35,7 @@ class OpenAIGPTChatAPI(BaseAPI):
     def run(
             self,
             prompt: Union[str, List],
-            response_format: Union[None, Type],
+            response_format: Union[None, Type] = None,
             temperature: float = 0.7,
             retry_times: int = 3,
             retry_sec: int = 5
@@ -62,7 +62,7 @@ class OpenAIGPTChatAPI(BaseAPI):
     async def arun(
             self,
             prompt: Union[str, List],
-            response_format: Union[None, Type],
+            response_format: Union[None, Type] = None,
             temperature: float = 0.7,
             retry_times: int = 3,
             retry_sec: int = 5

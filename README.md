@@ -4,8 +4,8 @@ RAG (Retrieved, Augmentated, Generation) and AGENT tools.
 
 ## Motivation
 
-1. **Extended LLM call** <br>
-    Based on `Gemini` and `OpenAI` official API, extend more useful functions include:
+1. **Extended LLM call**
+    + Based on `Gemini` and `OpenAI` official API, extend more useful functions include:
     
     | API       | Async      | Retry              | Get token/price | Formatted response | Img Input |
     | -         | -          | -                  | -               | -                  | - |
@@ -14,6 +14,7 @@ RAG (Retrieved, Augmentated, Generation) and AGENT tools.
     | Ours      | ✅ Call    | ✅ conn. & format | ✅ .get_price() | ✅ Server-side (strong) | ✅ |
     
     see implementation details of [Gemini](ragentools/api_calls/google_gemini.py) and [GPT](ragentools/api_calls/openai_gpt.py)
+    + Embedding API is also included which benefits for Async, Retry and price.
 
 2. **Agents** <br>
     + Based on **Extended LLM call** and **LangChain Runnable**, build complex agent by `LangGraph` efficiently.
@@ -36,9 +37,15 @@ RAG (Retrieved, Augmentated, Generation) and AGENT tools.
     + Parsers
         + BaseParser -> PDFParser, TextParser
         + About chunk size
+            + Rule of thumbs: chunk_size=500~1500 characters, chunk_overlap=10%~20%
             + Too fragmented -> Low k@recall or Low context recall -> Need to increase
             + Too much irrelevent -> Low k@precision -> Need to decrease
     + Indexers
+        + Embedding
+            + Dimension
+                + Rule of thumbs: ~1k docs -> 2048~3072; ~1M docs -> 1024 ~ 2048
+                + Downstream task gradual reduction
+            + 
     + Retrievers
     + Evaluators - RAGAs
         + RAGAs <br>

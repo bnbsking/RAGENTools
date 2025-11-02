@@ -1,6 +1,9 @@
+from typing import List
+
+import numpy as np
 import yaml
 
-from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI
+from ragentools.api_calls.google_gemini import GoogleGeminiEmbeddingAPI, GoogleGeminiChatAPI
 from ragentools.common.async_main import amain_wrapper
 from ragentools.common.formatting import get_response_model
 from ragentools.prompts import get_prompt_and_response_format
@@ -67,9 +70,38 @@ class TestGoogleGeminiChatAPI:
         print(results, self.api.get_price())
 
 
+class TestGoogleGeminiEmbedAPI:
+    @classmethod
+    def setup_class(cls):
+        api_key = yaml.safe_load(open("/app/tests/api_keys.yaml"))["GOOGLE_API_KEY"]
+        cls.api = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name="gemini-embedding-001")
+        cls.prompt = [
+            "The dog barked all night.",
+            "AI is changing the world."
+        ]
+        cls.dim = 3072
+        cls.expect_type = List[List[float]]
+
+    def test_run(self):
+        embeddings = self.api.run(prompt=self.prompt, dim=self.dim)
+        assert np.array(embeddings).shape == (len(self.prompt), 3072)
+        print(embeddings[0][:3], self.api.get_price())
+
+    def test_arun(self):
+        results = amain_wrapper(self.api.arun, [{"prompt": self.prompt, "dim": self.dim}])
+        embeddings = results[0]
+        assert np.array(embeddings).shape == (len(self.prompt), 3072)
+        print(embeddings[0][:3], self.api.get_price())
+
+
 if __name__ == "__main__":
-    obj = TestGoogleGeminiChatAPI()
+    # obj = TestGoogleGeminiChatAPI()
+    # obj.setup_class()
+    # obj.test_run()
+    # obj.test_arun()
+    # obj.test_arun_img()
+
+    obj = TestGoogleGeminiEmbedAPI()
     obj.setup_class()
-    obj.test_run()
+    #obj.test_run()
     obj.test_arun()
-    obj.test_arun_img()
