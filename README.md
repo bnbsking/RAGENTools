@@ -1,4 +1,4 @@
-## RAGENTools: Retrieved, Augmentated, Generation (RAG) and AGENT tools.
+# RAGENTools: Retrieved, Augmentated, Generation (RAG) and AGENT tools.
 
 <div align="center">
   <a href="https://pypi.python.org/pypi/ragentools"><img src="https://img.shields.io/pypi/v/ragentools.svg"></a><br>
