@@ -60,7 +60,7 @@
             + TextParser
     + Indexers
         + Tuning Embedding Dimension
-            + Rule of thumbs: "~1k docs -> 2048~3072"; "~1M docs -> 1024 ~ 2048"
+            + Rule of thumbs: "~1k docs -> 2048 ~ 3072"; "~1M docs -> 1024 ~ 2048"
             + Downstream task gradual reduction
         + Supported indexers
             + Two-level indexing by FAISS
