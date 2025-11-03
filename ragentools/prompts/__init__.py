@@ -20,6 +20,6 @@ def get_prompt_and_response_format(prompt_path: str, replace_dict: dict = {}, re
     replace_dict = prompt_cfg["default_replacements"] | replace_dict
     
     for key, value in replace_dict.items():
-        prompt = prompt.replace(f"{{{{ {key} }}}}", value)
+        prompt = prompt.replace(f"{{{{ {key} }}}}", str(value))
     response_format = getattr(ResponseFormatProcessor, response_process)(prompt_cfg['response_format'])
     return prompt, response_format

@@ -8,4 +8,8 @@ indexing:
   data_folder: /app/rags/papers/data/
   parsed_save_folder: /app/rags/papers/v1/parsed
   indices_save_folder: /app/rags/papers/v1/indices/
-  
+
+gen_qa:
+  prompt_path: ragentools/prompts/genqa/basic.yaml
+  sample_each_csv: 2
+  save_path: /app/rags/papers/v1/genqa/qa_pairs.json

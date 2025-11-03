@@ -1,0 +1,62 @@
+[
+    {
+        "question": "What are the key areas that medicine focuses on to ensure well-being?",
+        "answer": "Medicine focuses on diagnosing, treating, and preventing disease and injury, as well as maintaining and promoting overall health.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "Which ancient civilizations contributed to the foundational knowledge of medicine?",
+        "answer": "Ancient civilizations such as Egypt, Mesopotamia, India, China, and Greece contributed foundational knowledge in anatomy, pharmacology, and surgery.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "Who is often referred to as the 'Father of Medicine' and what was his primary contribution?",
+        "answer": "Hippocrates, often called the \u201cFather of Medicine,\u201d emphasized systematic observation and ethics in clinical practice.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "Who is considered the \"Father of Medicine\", and what were his key contributions to the field?",
+        "answer": "The \"Father of Medicine\" emphasized systematic observation and ethics in clinical practice, laying the groundwork for modern medical ethics.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What are the core focuses of Clinical Medicine and Preventive Medicine?",
+        "answer": "Clinical Medicine focuses on patient care, diagnosis, and treatment. Preventive Medicine aims to prevent disease through vaccination, health education, lifestyle interventions, and public health initiatives.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "Briefly describe the focus of Pharmacology and Surgery as branches of medicine.",
+        "answer": "Pharmacology is the study of drugs, their effects on the body, and their therapeutic applications. Surgery involves operative procedures to repair, remove, or replace damaged tissue or organs.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What did Elara say the carvings on the archway were?",
+        "answer": "Elara said the carvings were wards.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    {
+        "question": "What did the air smell like inside the entrance?",
+        "answer": "The air was thick with the scent of moss and decay.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    {
+        "question": "What features did the city inside the entrance have?",
+        "answer": "The city had towering spires of stone, intricate bridges over chasms, and waterfalls cascading from cliffs into misty abysses.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    {
+        "question": "What were the qualities required to successfully navigate the maze?",
+        "answer": "Each step required not just courage, but insight and trust.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 2
+    }
+]

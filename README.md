@@ -7,14 +7,20 @@ RAG (Retrieved, Augmentated, Generation) and AGENT tools.
 1. **Extended LLM call**
     + Based on `Gemini` and `OpenAI` official API, extend more useful functions include:
     
-    | API       | Async      | Retry              | Get token/price | Formatted response | Img Input |
+    | Chat API  | Async      | Retry              | Get token/price | Formatted response | Img Input |
     | -         | -          | -                  | -               | -                  | - |
     | Official  | ⚠️ Wrapper | ❌ Not support    | ⚠️ Hassle       | ✅ Server-side (strong) | ✅ |
     | LangChain | ⚠️ Wrapper | ⚠️ conn. only     | ⚠️ Hassle       | ⚠️ Client-side (medium) | ✅ |
     | Ours      | ✅ Call    | ✅ conn. & format | ✅ .get_price() | ✅ Server-side (strong) | ✅ |
     
+    + Also auto batching for embedding api
+
+    | Emb API   | Async      | Retry           | Get token/price | Batching           |
+    | -         | -          | -               | -               | -                  |
+    | Official  | ⚠️ Wrapper | ❌ Not support | ⚠️ Hassle       | ⚠️ Overflow error |
+    | Ours      | ✅ Call    | ✅ connection  | ✅ .get_price() | ✅ Auto address error |
+
     see implementation details of [Gemini](ragentools/api_calls/google_gemini.py) and [GPT](ragentools/api_calls/openai_gpt.py)
-    + Embedding API is also included which benefits for Async, Retry and price.
 
 2. **Agents** <br>
     + Based on **Extended LLM call** and **LangChain Runnable**, build complex agent by `LangGraph` efficiently.
@@ -34,23 +40,38 @@ RAG (Retrieved, Augmentated, Generation) and AGENT tools.
         + output folder: `agents/text2chart/v1/save/matplotbench_easy`
 
 3. **RAG**
+    + Core
+        + Scalabitity, Flexibility for various type of parsers, indexers, retrivers, evaluators
+        + example: Embedding for LangChain <br>
+            ![lanchain_emb](pics/emb_design.png)
+
     + Parsers
-        + BaseParser -> PDFParser, TextParser
-        + About chunk size
+        + Tuning chunk size
             + Rule of thumbs: chunk_size=500~1500 characters, chunk_overlap=10%~20%
             + Too fragmented -> Low k@recall or Low context recall -> Need to increase
             + Too much irrelevent -> Low k@precision -> Need to decrease
+        + Supported Parsers
+            + PDFParser
+            + TextParser
     + Indexers
-        + Embedding
-            + Dimension
-                + Rule of thumbs: ~1k docs -> 2048~3072; ~1M docs -> 1024 ~ 2048
-                + Downstream task gradual reduction
-            + 
+        + Tuning Embedding Dimension
+            + Rule of thumbs: ~1k docs -> 2048~3072; ~1M docs -> 1024 ~ 2048
+            + Downstream task gradual reduction
+        + Supported indexers
+            + Two-level indexing by FAISS
+                + fine-level: chunk 
+                + coarse-level: file
     + Retrievers
-    + Evaluators - RAGAs
-        + RAGAs <br>
-            ![ragas](pics/ragas.png)
-        + Tuning strategy
+        + Supported retrievers
+            + Two-level retriever from FAISS
+                + fine-level: chunk 
+                + coarse-level: file
+                + rerank by difference score and concat into a piece of prompt
+    + Evaluators
+        + Supported evaluators
+            + RAGAs <br>
+                ![ragas](pics/ragas.png)
+            + Tuning strategy
         
 | Metrics        | Method       | Used | Target | Meaning | Tuning |
 | -              | -            | -    | -      | -       | -      |
@@ -67,8 +88,8 @@ RAG (Retrieved, Augmentated, Generation) and AGENT tools.
 pip instal -e .
 ```
 
-## Examples
-#### 1. Call API
+## Example 1 - Call API
+
 following code with the features
 + 1 formatted response: dictionary followed by Google official configuration.
 + 2 image input: followed by Google official configuration
@@ -129,7 +150,7 @@ The outcome will be
 0
 ```
 
-#### 2. Text2Chart agent
+## Example 2 - Text2Chart agent
 + code
     + Each node
         + Inherits "LangChain Runnable" for graph scalability
@@ -250,4 +271,171 @@ prompts:
 }
 ```
 
-#### 3 RAG
+## Example 3 - RAG
+
++ Overview flow <br>
+![two_level_rag](pics/two_level_rag.png)
++ Full example of [parsing with indexing](rags/papers/v1/indexing.py) and [retrieving](rags/papers/v1/retrieving.py)
+
+#### Parsing and Indexing
+```python
+import glob
+import os
+
+import yaml
+
+from ragentools.api_calls.google_gemini import (
+    GoogleGeminiEmbeddingAPI,
+    GoogleGeminiChatAPI,
+)
+from ragentools.indexers.embedding import CustomEmbedding
+from ragentools.indexers.indexers import two_level_indexing
+from ragentools.parsers.pdf_parser import PDFParser
+
+
+if __name__ == "__main__":
+    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
+    cfg_api = cfg["api"]
+    cfg_ind = cfg["indexing"]
+
+    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
+    api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
+    api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
+    embed_model = CustomEmbedding(api=api_emb, dim=3072)
+
+    # Parsing
+    parser = PDFParser(
+        input_path_list=glob.glob(cfg_ind["data_folder"] + "*.pdf"),
+        output_folder=os.path.join(cfg_ind["parsed_save_folder"])
+    )
+    parser.parse()
+
+    # Indexing
+    two_level_indexing(
+        parsed_csv_folder=cfg_ind["parsed_save_folder"],
+        indices_save_folder=cfg_ind["indices_save_folder"],
+        embed_model=embed_model,
+        api_chat=api_chat
+    )
+```
+
++ input: List of pdf path
++ output: csv for each pdf. example:
+    
+    | chunk                      | source_path      | page |
+    | -                          | -                | -    |
+    | Hi There! Nice to meet you | /path/to/doc.pdf | 7    |
+
+#### Retrieving
+```python
+import os
+import yaml
+
+from ragentools.api_calls.google_gemini import GoogleGeminiEmbeddingAPI
+from ragentools.indexers.embedding import CustomEmbedding
+from ragentools.retrievers.retrievers import TwoLevelRetriever
+
+
+if __name__ == "__main__":
+    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
+    cfg_api = cfg["api"]
+    cfg_ind = cfg["indexing"]
+
+    # Init API
+    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
+    api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
+    embed_model = CustomEmbedding(api=api_emb, dim=3072)
+
+    # Load two-level retriever
+    retriever = TwoLevelRetriever(
+        embed_model=embed_model,
+        fine_index_folder=cfg_ind["indices_save_folder"],
+        coarse_index_path=os.path.join(cfg_ind["indices_save_folder"], "coarse_grained_index.faiss")
+    )
+
+    # Query
+    question = "Why did Kael and his companions enter Seraphel despite the warnings from the local tribes?"
+    retrieved_chunks = retriever.query(question)  # List
+    retrieved_text = retriever.chunks_concat(retrieved_chunks)
+    print(retrieved_text)
+```
++ Input index folders, the output is text:
+```txt
+Chunk 1 with score 0.0963:
+jungle seemed to grow silent. Even the rain softened as if the forest itself was 
+holding its breath. Through the mist, they saw it—a massive stone archway, carved with 
+symbols that glowed faintly under the stormy sky. The entrance to Seraphel. 
+Elara stepped forward, tracing her fingers over the carvings. “These are wards,” she 
+whispered. “To keep intruders out… or to trap them in.” 
+Ryn grunted. “Well, we’re already in. Might as well see what’s inside.” 
+They entered cautiously. Inside, the air was thick with the scent of moss and decay, and 
+shadows danced along walls that seemed impossibly tall. The city stretched before them: 
+towering spires of stone, intricate bridges over chasms, and waterfalls cascading from cliffs 
+into misty abysses. 
+Kael’s eyes were drawn to the center of th
+
+==========
+Chunk 2 with score 0.097:
+nd waterfalls cascading from cliffs 
+into misty abysses. 
+Kael’s eyes were drawn to the center of the city, where a massive temple rose, its roof 
+adorned with a symbol of a sun encircled by serpents. “That’s our destination,” he said. “The 
+Heart of Seraphel. Whatever is there… it’s what we came for.” 
+The streets of the city were eerily empty, save for the occasional echo of footsteps that were 
+not theirs. Strange creatures lurked in the shadows: serpentine beings with glowing eyes, 
+and birds with feathers like shards of crystal. They seemed harmless at first, but the sense of 
+being watched never left. 
+As they approached the temple, a low rumble shook the ground. The doors of the temple, 
+carved from obsidian, slowly began to open as if acknowledging their arrival. Inside, a vast 
+ha
+...
+```
++ scores means the difference between the chunk and the query
+
+#### GenQA
+
++ code
+```python
+import glob
+import json
+import os
+
+import pandas as pd
+import yaml
+
+from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI
+from ragentools.genqa.genqa import generate_qa_pairs
+
+
+if __name__ == "__main__":
+    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
+    cfg_api = cfg["api"]
+    cfg_ind = cfg["indexing"]
+    cfg_qa = cfg["gen_qa"]
+
+    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
+    api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
+    
+    generate_qa_pairs(
+        prompt_path=cfg_qa["prompt_path"],
+        csv_folder=cfg_ind["parsed_save_folder"],
+        sample_each_csv=cfg_qa["sample_each_csv"],
+        api_chat=api_chat,
+        save_path=cfg_qa["save_path"],
+    )
+```
+
++ output format:
+```json
+[
+    {
+        "question": "What did Elara say the carvings on the archway were?",
+        "answer": "Elara said the carvings were wards.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    ...
+]
+```
+
+#### Evaluation

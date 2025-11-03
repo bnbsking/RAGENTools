@@ -1,0 +1,25 @@
+prompt: |
+  You are an expert of generating QA pairs.
+  Given the context, generate {{ num }} question-answer pairs in JSON format.
+  Make sure
+  + the question is hard to answer without the context
+  + the answer is contained or paraphrased within the context.
+
+  Context: {{ context }}
+
+default_replacements:
+  num: 3
+
+response_format:
+  question-1:
+    type: string
+  answer-1:
+    type: string
+  question-2:
+    type: string
+  answer-2:
+    type: string
+  question-3:
+    type: string
+  answer-3:
+    type: string

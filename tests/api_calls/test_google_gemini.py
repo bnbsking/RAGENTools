@@ -75,22 +75,22 @@ class TestGoogleGeminiEmbedAPI:
     def setup_class(cls):
         api_key = yaml.safe_load(open("/app/tests/api_keys.yaml"))["GOOGLE_API_KEY"]
         cls.api = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name="gemini-embedding-001")
-        cls.prompt = [
+        cls.texts = [
             "The dog barked all night.",
             "AI is changing the world."
         ]
         cls.dim = 3072
         cls.expect_type = List[List[float]]
 
-    def test_run(self):
-        embeddings = self.api.run(prompt=self.prompt, dim=self.dim)
-        assert np.array(embeddings).shape == (len(self.prompt), 3072)
+    def test_run_batches(self):
+        embeddings = self.api.run_batches(texts=self.texts, dim=self.dim)
+        assert np.array(embeddings).shape == (len(self.texts), 3072)
         print(embeddings[0][:3], self.api.get_price())
 
-    def test_arun(self):
-        results = amain_wrapper(self.api.arun, [{"prompt": self.prompt, "dim": self.dim}])
+    def test_arun_batches(self):
+        results = amain_wrapper(self.api.arun_batches, [{"texts": self.texts, "dim": self.dim}])
         embeddings = results[0]
-        assert np.array(embeddings).shape == (len(self.prompt), 3072)
+        assert np.array(embeddings).shape == (len(self.texts), 3072)
         print(embeddings[0][:3], self.api.get_price())
 
 
@@ -103,5 +103,5 @@ if __name__ == "__main__":
 
     obj = TestGoogleGeminiEmbedAPI()
     obj.setup_class()
-    #obj.test_run()
-    obj.test_arun()
+    #obj.test_run_batches()
+    obj.test_arun_batches()

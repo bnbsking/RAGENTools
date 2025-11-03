@@ -39,9 +39,9 @@ class OpenAIGPTChatAPI(BaseAPI):
             temperature: float = 0.7,
             retry_times: int = 3,
             retry_sec: int = 5
-        ) -> Union[str, Type]:
+        ) -> Union[str, Type]:  # process 1 query (prompt) at once
         @retry(stop=stop_after_attempt(retry_times), wait=wait_fixed(retry_sec))
-        def _call_api():
+        def _call_api() -> Union[str, Type]:
             args = {
                 "model": self.model_name,
                 "messages": self.prompt_to_messages(prompt),
@@ -66,9 +66,9 @@ class OpenAIGPTChatAPI(BaseAPI):
             temperature: float = 0.7,
             retry_times: int = 3,
             retry_sec: int = 5
-        ) -> Union[str, Type]:
+        ) -> Union[str, Type]:  # process 1 query (prompt) at once
         @retry(stop=stop_after_attempt(retry_times), wait=wait_fixed(retry_sec))
-        async def _call_api():
+        async def _call_api() -> Union[str, Type]:
             args = {
                 "model": self.model_name,
                 "messages": self.prompt_to_messages(prompt),
