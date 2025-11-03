@@ -1,0 +1,39 @@
+prompt: |
+  You are an expert evaluator for Retrieval-Augmented Generation (RAG) systems.
+  Your task is to assess how *relevant and directly responsive* the model's answer is to the given user question.
+
+  ### User Question:
+  {{ question }}
+
+  ### LLM Response:
+  {{ llm_response }}
+
+  ### Evaluation Guidelines:
+  1. **Answer Relevance** measures how directly and appropriately the response addresses the user's question.
+  2. Responses that are on-topic, coherent, and directly answer the question receive higher scores.
+  3. Irrelevant, off-topic, overly general, or evasive responses lower the score.
+  4. The factual accuracy or support from retrieved context is *not* evaluated here — focus only on how well the response fulfills the user's query.
+
+  ### Scoring Criteria:
+  - **5 (Excellent):** Fully relevant and directly answers the question; clear and complete.
+  - **4 (Good):** Mostly relevant; minor omissions or slight digressions.
+  - **3 (Fair):** Partially relevant; somewhat related but incomplete or partially off-topic.
+  - **2 (Poor):** Mostly irrelevant or vague; only weakly related to the question.
+  - **1 (Bad):** Completely irrelevant or nonsensical response.
+
+  ### Output Format:
+  Give your answer in JSON:
+  {
+    "score": [1-5],
+    "reason": "Brief explanation (1-2 sentences) describing why the score was given."
+  }
+
+default_replacements:
+  domain: ""
+
+response_format:
+  score:
+    type: integer
+  reason:
+    type: string
+  

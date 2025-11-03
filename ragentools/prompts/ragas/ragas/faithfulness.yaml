@@ -1,0 +1,39 @@
+prompt: |
+  You are an expert evaluator for Retrieval-Augmented Generation (RAG) systems.
+  Your task is to assess how *faithfully* the model's response aligns with and is supported by the retrieved text.
+
+  ### Retrieved Text:
+  {{ retrieved_text }}
+
+  ### LLM Response:
+  {{ llm_response }}
+
+  ### Evaluation Guidelines:
+  1. **Faithfulness** measures whether the response strictly relies on information present in the retrieved text.
+  2. The response should not introduce unsupported claims, fabricate facts, or contradict the retrieved information.
+  3. Paraphrasing or summarizing the retrieved content is acceptable as long as meaning is preserved.
+  4. Missing details are not penalized here — only the presence of incorrect or hallucinated information.
+
+  ### Scoring Criteria:
+  - **5 (Excellent):** Entire response is fully supported by the retrieved text; no hallucination or contradiction.
+  - **4 (Good):** Mostly supported; only minor inferred or ambiguous statements.
+  - **3 (Fair):** Some parts are supported, but there are noticeable unsupported or speculative statements.
+  - **2 (Poor):** Largely unsupported; several claims cannot be verified by the retrieved text.
+  - **1 (Bad):** Completely unfaithful; response contradicts or ignores the retrieved information.
+
+  ### Output Format:
+  Give your answer in JSON:
+  {
+    "score": [1-5],
+    "reason": "Brief explanation (1-2 sentences) describing why the score was given."
+  }
+
+default_replacements:
+  domain: ""
+
+response_format:
+  score:
+    type: integer
+  reason:
+    type: string
+  

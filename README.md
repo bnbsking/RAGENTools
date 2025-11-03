@@ -320,77 +320,15 @@ if __name__ == "__main__":
 ```
 
 + input: List of pdf path
-+ output: csv for each pdf. example:
++ output:
+    + csv for each pdf. example:
     
     | chunk                      | source_path      | page |
     | -                          | -                | -    |
     | Hi There! Nice to meet you | /path/to/doc.pdf | 7    |
 
-#### Retrieving
-```python
-import os
-import yaml
-
-from ragentools.api_calls.google_gemini import GoogleGeminiEmbeddingAPI
-from ragentools.indexers.embedding import CustomEmbedding
-from ragentools.retrievers.retrievers import TwoLevelRetriever
-
-
-if __name__ == "__main__":
-    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
-    cfg_api = cfg["api"]
-    cfg_ind = cfg["indexing"]
-
-    # Init API
-    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
-    api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
-    embed_model = CustomEmbedding(api=api_emb, dim=3072)
-
-    # Load two-level retriever
-    retriever = TwoLevelRetriever(
-        embed_model=embed_model,
-        fine_index_folder=cfg_ind["indices_save_folder"],
-        coarse_index_path=os.path.join(cfg_ind["indices_save_folder"], "coarse_grained_index.faiss")
-    )
-
-    # Query
-    question = "Why did Kael and his companions enter Seraphel despite the warnings from the local tribes?"
-    retrieved_chunks = retriever.query(question)  # List
-    retrieved_text = retriever.chunks_concat(retrieved_chunks)
-    print(retrieved_text)
-```
-+ Input index folders, the output is text:
-```txt
-Chunk 1 with score 0.0963:
-jungle seemed to grow silent. Even the rain softened as if the forest itself was 
-holding its breath. Through the mist, they saw it—a massive stone archway, carved with 
-symbols that glowed faintly under the stormy sky. The entrance to Seraphel. 
-Elara stepped forward, tracing her fingers over the carvings. “These are wards,” she 
-whispered. “To keep intruders out… or to trap them in.” 
-Ryn grunted. “Well, we’re already in. Might as well see what’s inside.” 
-They entered cautiously. Inside, the air was thick with the scent of moss and decay, and 
-shadows danced along walls that seemed impossibly tall. The city stretched before them: 
-towering spires of stone, intricate bridges over chasms, and waterfalls cascading from cliffs 
-into misty abysses. 
-Kael’s eyes were drawn to the center of th
-
-==========
-Chunk 2 with score 0.097:
-nd waterfalls cascading from cliffs 
-into misty abysses. 
-Kael’s eyes were drawn to the center of the city, where a massive temple rose, its roof 
-adorned with a symbol of a sun encircled by serpents. “That’s our destination,” he said. “The 
-Heart of Seraphel. Whatever is there… it’s what we came for.” 
-The streets of the city were eerily empty, save for the occasional echo of footsteps that were 
-not theirs. Strange creatures lurked in the shadows: serpentine beings with glowing eyes, 
-and birds with feathers like shards of crystal. They seemed harmless at first, but the sense of 
-being watched never left. 
-As they approached the temple, a low rumble shook the ground. The doors of the temple, 
-carved from obsidian, slowly began to open as if acknowledging their arrival. Inside, a vast 
-ha
-...
-```
-+ scores means the difference between the chunk and the query
+    + faiss indices
+        + *.faiss
 
 #### GenQA
 
@@ -438,4 +376,220 @@ if __name__ == "__main__":
 ]
 ```
 
+
+#### Retrieving and Answering
+```python
+import json
+import os
+import yaml
+
+from ragentools.api_calls.google_gemini import (
+    GoogleGeminiEmbeddingAPI,
+    GoogleGeminiChatAPI
+)
+from ragentools.indexers.embedding import CustomEmbedding
+from ragentools.retrievers.retrievers import TwoLevelRetriever
+
+
+if __name__ == "__main__":
+    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
+    cfg_api = cfg["api"]
+    cfg_ind = cfg["indexing"]
+    cfg_qa = cfg["gen_qa"]
+    cfg_ans = cfg["answering"]
+
+    # Init API
+    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
+    api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
+    api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
+    embed_model = CustomEmbedding(api=api_emb, dim=3072)
+
+    # Load two-level retriever
+    retriever = TwoLevelRetriever(
+        embed_model=embed_model,
+        fine_index_folder=cfg_ind["indices_save_folder"],
+        coarse_index_path=os.path.join(cfg_ind["indices_save_folder"], "coarse_grained_index.faiss")
+    )
+
+    # Query
+    data_list = json.load(open(cfg_qa["save_path"], 'r', encoding='utf-8'))
+    for i, data in enumerate(data_list):
+        question = data["question"]
+        retrieved_chunks = retriever.query(question)
+        retrieved_text = retriever.chunks_concat(retrieved_chunks)
+        answer = api_chat.run(
+            prompt=f"""Use the following RAG retrieved chunks to answer the question.
+                Chunks: {retrieved_text}
+                Question: {question}
+            """,
+            retry_sec=20,
+        )
+        data_list[i]["llm_response"] = answer
+        data_list[i]["retrieved_chunks"] = retrieved_chunks
+    os.makedirs(os.path.dirname(cfg_ans["save_path"]), exist_ok=True)
+    json.dump(data_list, open(cfg_ans["save_path"], 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+
+```
+
++ The output format is
+```json
+[
+    {
+        "question": "What are the key areas that medicine focuses on to ensure well-being?",
+        "answer": "Medicine focuses on diagnosing, treating, and preventing disease and injury, as well as maintaining and promoting overall health.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1,
+        "llm_response": "Based on the retrieved chunks, medicine focuses on the following key areas to ensure well-being:\n\n*   Diagnosing, treating, and preventing disease and injury.\n*   Maintaining and promoting overall health.\n*   Continuous learning, research, and clinical practice to improve the quality and longevity of life and alleviate suffering.\n*   Ethical considerations, including respect for patient autonomy, beneficence, non-maleficence, and justice.\n*   Preventive measures through vaccination, health education, lifestyle interventions, and public health initiatives."
+    },
+    ...
+]
+```
+
++ The retrieved_text is as:
+```txt
+Chunk 1 with score 0.0963:
+jungle seemed to grow silent. Even the rain softened as if the forest itself was 
+holding its breath. Through the mist, they saw it—a massive stone archway, carved with 
+symbols that glowed faintly under the stormy sky. The entrance to Seraphel. 
+Elara stepped forward, tracing her fingers over the carvings. “These are wards,” she 
+whispered. “To keep intruders out… or to trap them in.” 
+Ryn grunted. “Well, we’re already in. Might as well see what’s inside.” 
+They entered cautiously. Inside, the air was thick with the scent of moss and decay, and 
+shadows danced along walls that seemed impossibly tall. The city stretched before them: 
+towering spires of stone, intricate bridges over chasms, and waterfalls cascading from cliffs 
+into misty abysses. 
+Kael’s eyes were drawn to the center of th
+
+==========
+Chunk 2 with score 0.097:
+nd waterfalls cascading from cliffs 
+into misty abysses. 
+Kael’s eyes were drawn to the center of the city, where a massive temple rose, its roof 
+adorned with a symbol of a sun encircled by serpents. “That’s our destination,” he said. “The 
+Heart of Seraphel. Whatever is there… it’s what we came for.” 
+The streets of the city were eerily empty, save for the occasional echo of footsteps that were 
+not theirs. Strange creatures lurked in the shadows: serpentine beings with glowing eyes, 
+and birds with feathers like shards of crystal. They seemed harmless at first, but the sense of 
+being watched never left. 
+As they approached the temple, a low rumble shook the ground. The doors of the temple, 
+carved from obsidian, slowly began to open as if acknowledging their arrival. Inside, a vast 
+ha
+...
+```
++ scores means the difference between the chunk and the query
+
+
 #### Evaluation
+```python
+import yaml
+from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI
+from ragentools.evaluators.evaluators import RAGAsEvaluator
+
+if __name__ == "__main__":
+    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
+    cfg_api = cfg["api"]
+    cfg_ans = cfg["answering"]
+    cfg_eval = cfg["eval"]
+
+    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
+    api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
+    
+    evaluator = RAGAsEvaluator(
+        load_path=cfg_ans["save_path"],
+        save_folder=cfg_eval["save_folder"],
+        api=api_chat,
+    )
+    evaluator.evaluate()
+```
+
++ output format
+
+each data
+
+```json
+[
+    {
+        "question": "What are the key areas that medicine focuses on to ensure well-being?",
+        "answer": "Medicine focuses on diagnosing, treating, and preventing disease and injury, as well as maintaining and promoting overall health.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1,
+        "llm_response": "Medicine focuses on diagnosing, treating, and preventing disease and injury, as well as maintaining and promoting overall health. It aims to improve the quality and longevity of life and alleviate suffering through continuous learning, research, and clinical practice. Key areas include clinical medicine, preventive medicine, pharmacology, surgery, and pathology.\n",
+        "retrieved_text": ...,
+        "eval": {
+            "answer_correctness": {
+                "score": 5,
+                "reason": "The response is fully correct and semantically equivalent to the ground truth. The additional information is consistent and does not contradict the ground truth."
+            },
+            "answer_relevancy": {
+                "score": 5,
+                "reason": "The response directly answers the question by listing key areas of medicine that ensure well-being, such as diagnosing, treating, and preventing disease."
+            },
+            "context_precision": {
+                "score": 5,
+                "reason": "The retrieved text focuses specifically on the key areas of medicine related to ensuring well-being, such as disease prevention, treatment, and health promotion."
+            },
+            "context_recall": {
+                "score": 5,
+                "reason": "The retrieved text fully encompasses the ground truth answer, covering diagnosis, treatment, prevention, and health maintenance."
+            },
+            "faithfulness": {
+                "score": 5,
+                "reason": "The response accurately summarizes the retrieved text, focusing on the definition, goals, and key areas of medicine without introducing any unsupported information or contradictions."
+            }
+        }
+    },
+    ...
+]
+```
+and all data
+```json
+{
+    "answer_correctness": 5.0,
+    "answer_relevancy": 5.0,
+    "context_precision": 5.0,
+    "context_recall": 3.0,
+    "faithfulness": 5.0
+}
+```
+
+#### LLM advice
+```python
+import json
+
+import yaml
+
+from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI
+from ragentools.prompts import get_prompt_and_response_format
+
+
+if __name__ == "__main__":
+    cfg = yaml.safe_load(open("/app/rags/papers/v1/rags_papers_v1.yaml"))
+    cfg_api = cfg["api"]
+    cfg_eval = cfg["eval"]
+
+    api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
+    api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
+    
+    prompt, response_format = get_prompt_and_response_format(
+        "/app/ragentools/prompts/ragas/advisor.yaml"
+    )
+    avg_score_dict = json.load(open("/app/rags/papers/v1/eval/avg_score.json"))
+    response = api_chat.run(
+        prompt=prompt.replace("{{ avg_score_dict }}", str(avg_score_dict)),
+        response_format=response_format
+    )
+    with open(f"{cfg_eval['save_folder']}/advises.txt", 'w', encoding='utf-8') as f:
+        f.write(response)
+    print(response)
+```
+
+
+#### Put everything together
++ See the [folder](/app/rags/papers/v1)
+```bash
+python /app/rags/papers/v1/indexing.py  # in: data; out: parsed + indices
+python /app/rags/papers/v1/genqa.py  # in: parsed; out: genqa
+python /app/rags/papers/v1/answering.py  # in: genqa + indices; out: answers
+python /app/rags/papers/v1/eval.py  # in: answers; out: eval
+python /app/rags/papers/v1/advisor.py  # in: eval; out: eval
+```

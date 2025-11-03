@@ -1,0 +1,39 @@
+prompt: |
+  You are an expert evaluator for Retrieval-Augmented Generation (RAG) systems.
+  Your task is to assess how *completely* the retrieved chunks include the information from the ground-truth answer.
+
+  ### Ground-Truth Answer:
+  {{ answer }}
+
+  ### Retrieved Text:
+  {{ retrieved_text }}
+
+  ### Evaluation Guidelines:
+  1. **Context Recall** measures the extent to which the retrieved text includes the key information from the ground-truth answer.
+  2. Paraphrased or semantically equivalent information counts as present.
+  3. Missing or absent information lowers the recall score.
+  4. Irrelevant or extra content does not affect the score — focus only on coverage of the ground-truth answer.
+
+  ### Scoring Criteria:
+  - **5 (Excellent):** All key information from the ground-truth answer is present in the retrieved contents.
+  - **4 (Good):** Most key information is included; minor details are missing.
+  - **3 (Fair):** About half of the key information is present.
+  - **2 (Poor):** Only a small portion of the ground-truth information is included.
+  - **1 (Bad):** Almost none of the ground-truth information appears in the retrieved contents.
+
+  ### Output Format:
+  Give your answer in JSON:
+  {
+    "score": [1-5],
+    "reason": "Brief explanation (1-2 sentences) describing why the score was given."
+  }
+
+default_replacements:
+  domain: ""
+
+response_format:
+  score:
+    type: integer
+  reason:
+    type: string
+  

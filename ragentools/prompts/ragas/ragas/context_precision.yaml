@@ -1,0 +1,39 @@
+prompt: |
+  You are an expert evaluator for Retrieval-Augmented Generation (RAG) systems.
+  Your task is to assess how *precisely relevant* the retrieved contents are to the given user question.
+
+  ### User Question:
+  {{ question }}
+
+  ### Retrieved Text:
+  {{ retrieved_text }}
+
+  ### Evaluation Guidelines:
+  1. **Context Precision** means the degree to which the retrieved text is directly relevant and specific to answering the question.
+  2. Irrelevant or only tangentially related information lowers precision.
+  3. Redundant but relevant information does not lower precision.
+  4. Missing information is not penalized here — only the presence of irrelevant or noisy context matters.
+
+  ### Scoring Criteria:
+  - **5 (Excellent):** All retrieved content is highly relevant and directly supports answering the question.
+  - **4 (Good):** Most content is relevant, with only minor unrelated details.
+  - **3 (Fair):** About half of the content is relevant; noticeable noise or unrelated parts.
+  - **2 (Poor):** Mostly irrelevant or generic content.
+  - **1 (Bad):** Almost completely unrelated to the question.
+
+  ### Output Format:
+  Give your answer in JSON:
+  {
+    "score": [1-5],
+    "reason": "Brief explanation (1-2 sentences) describing why the score was given."
+  }
+
+default_replacements:
+  domain: ""
+
+response_format:
+  score:
+    type: integer
+  reason:
+    type: string
+  

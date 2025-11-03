@@ -2,7 +2,7 @@ api:
   api_key_path: /app/tests/api_keys.yaml
   api_key_env: GOOGLE_API_KEY
   emb_model_name: gemini-embedding-001
-  chat_model_name: gemini-2.0-flash-lite
+  chat_model_name: gemini-2.0-flash  #-lite
 
 indexing:
   data_folder: /app/rags/papers/data/
@@ -13,3 +13,9 @@ gen_qa:
   prompt_path: ragentools/prompts/genqa/basic.yaml
   sample_each_csv: 2
   save_path: /app/rags/papers/v1/genqa/qa_pairs.json
+
+answering:
+  save_path: /app/rags/papers/v1/answers/answers.json
+
+eval:
+  save_folder: /app/rags/papers/v1/eval/

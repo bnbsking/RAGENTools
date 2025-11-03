@@ -1,0 +1,22 @@
+prompt: |
+  You are an expert RAG system advisor.
+  Below are the average evaluation scores for a generated response.
+  The scores are on a scale from {{ min_score }} to {{ max_score }}, the higher the better.
+
+  {{ avg_score_dict }}
+
+  Task: Provide **detailed and actionable suggestions** to improve the system's performance.
+  Focus on the areas with lower scores, but also offer general tips to improve overall quality.
+
+  Guidelines:
+  1. Analyze the scores and identify the weak points.
+  2. For each weak metric, explain why it may be low and give **specific steps** to improve it.
+  3. Give practical suggestions for improving the **retrieval system**, the **LLM response generation**, or **alignment between retrieval and generation**.
+  4. Keep suggestions clear, structured, and actionable — ideally in bullet points.
+  5. Avoid generic advice like “improve the model”; instead, target precise improvements (e.g., enhance retrieval coverage, reduce hallucinations, paraphrase handling, etc.)
+
+default_replacements:
+  min_score: 1
+  max_score: 5
+  
+response_format: {}

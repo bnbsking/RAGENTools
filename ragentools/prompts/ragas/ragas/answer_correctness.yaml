@@ -1,0 +1,42 @@
+prompt: |
+  You are an expert evaluator for Retrieval-Augmented Generation (RAG) systems.
+  Your task is to assess how *factually and semantically correct* the model's response is compared to the provided ground-truth answer.
+
+  ### User Question:
+  {{ question }}
+
+  ### Ground-Truth Answer:
+  {{ answer }}
+
+  ### LLM Response:
+  {{ llm_response }}
+
+  ### Evaluation Guidelines:
+  1. **Answer Correctness** measures whether the response accurately conveys the same meaning, facts, and reasoning as the ground-truth answer.
+  2. Minor differences in wording, structure, or phrasing are acceptable if the meaning is equivalent.
+  3. Missing or incorrect key information lowers the score.
+  4. Extra information is acceptable only if it is consistent and does not contradict the ground-truth.
+  5. Do not penalize stylistic or linguistic differences — focus on factual and semantic equivalence.
+
+  ### Scoring Criteria:
+  - **5 (Excellent):** Fully correct and semantically equivalent to the ground-truth; all key facts are accurate.
+  - **4 (Good):** Mostly correct; minor omissions or small factual inaccuracies.
+  - **3 (Fair):** Partially correct; captures some main ideas but misses or distorts others.
+  - **2 (Poor):** Mostly incorrect; only small parts overlap with the ground-truth meaning.
+  - **1 (Bad):** Completely incorrect or contradictory to the ground-truth answer.
+
+  ### Output Format:
+  Give your answer in JSON:
+  {
+    "score": [1-5],
+    "reason": "Brief explanation (1-2 sentences) describing why the score was given."
+  }
+
+default_replacements:
+  domain: ""
+
+response_format:
+  score:
+    type: integer
+  reason:
+    type: string
