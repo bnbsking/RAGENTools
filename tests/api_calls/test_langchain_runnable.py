@@ -1,7 +1,9 @@
+import numpy as np
+from typing import List
 import yaml
 
-from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI
-from ragentools.api_calls.langchain_runnable import ChatRunnable
+from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI, GoogleGeminiEmbeddingAPI
+from ragentools.api_calls.langchain_runnable import ChatRunnable, EmbRunnable
 from ragentools.common.async_main import amain_wrapper
 from ragentools.common.formatting import get_response_model
 from ragentools.prompts import get_prompt_and_response_format
@@ -74,10 +76,42 @@ class TestChatRunnable:
         print(results, self.runnable.api.get_price())
 
 
-if __name__ == "__main__":
-    test_instance = TestChatRunnable()
-    test_instance.setup_class()
-    test_instance.test_run()
-    test_instance.test_arun()
-    test_instance.test_arun_img()
+class TestEmbRunnable:
+    @classmethod
+    def setup_class(cls):
+        api_key = yaml.safe_load(open("/app/tests/api_keys.yaml"))["GOOGLE_API_KEY"]
+        cls.runnable = EmbRunnable(
+            api=GoogleGeminiEmbeddingAPI,
+            api_key=api_key,
+            model_name="gemini-embedding-001"
+        )
+        cls.texts = [
+            "The dog barked all night.",
+            "AI is changing the world."
+        ]
+        cls.dim = 3072
+        cls.expect_type = List[List[float]]
+
+    def test_run_batches(self):
+        embeddings = self.runnable.run_batches(input={"texts": self.texts, "dim": self.dim})
+        assert np.array(embeddings).shape == (len(self.texts), 3072)
+        print(embeddings[0][:3], self.runnable.api.get_price())
+
+    def test_arun_batches(self):
+        results = amain_wrapper(self.runnable.arun_batches, [{"input": {"texts": self.texts, "dim": self.dim}}])
+        embeddings = results[0]
+        assert np.array(embeddings).shape == (len(self.texts), 3072)
+        print(embeddings[0][:3], self.runnable.api.get_price())
     
+
+if __name__ == "__main__":
+    # test_instance = TestChatRunnable()
+    # test_instance.setup_class()
+    # test_instance.test_run()
+    # test_instance.test_arun()
+    # test_instance.test_arun_img()
+
+    test_instance = TestEmbRunnable()
+    test_instance.setup_class()
+    test_instance.test_run_batches()
+    test_instance.test_arun_batches()
