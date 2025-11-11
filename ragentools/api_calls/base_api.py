@@ -1,14 +1,16 @@
+import os
 import pandas as pd
 
 
 class BaseAPI:
-    def __init__(self, api_key: str, model_name: str, price_csv_path: str = ""):
+    def __init__(self, api_key: str, model_name: str, price_csv_path: str = "/app/ragentools/api_calls/prices.csv"):
         self.api_key = api_key
         self.model_name = model_name
         self.input_acc_tokens = 0
         self.output_acc_tokens = 0
 
-        if price_csv_path:
+        if os.path.exists(price_csv_path):
+            print("Price CSV found, activate price computing")
             df = pd.read_csv(price_csv_path)
             df_row = df[df['model_name'] == model_name]
             self.input_token_price = df_row["input_token_price"].values[0] / 1e6

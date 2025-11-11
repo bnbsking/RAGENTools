@@ -1,0 +1,74 @@
+[
+    {
+        "question": "What is the primary focus of medicine?",
+        "answer": "The primary focus of medicine is diagnosing, treating, and preventing disease and injury, as well as maintaining and promoting overall health.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "Besides treating diseases, what other aspects does medicine involve?",
+        "answer": "Medicine involves preventing disease and injury, as well as maintaining and promoting overall health.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What is the science and practice of diagnosing classified as?",
+        "answer": "The science and practice of diagnosing is classified as medicine.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What is the primary goal of healthcare practices?",
+        "answer": "To preserve and restore human and animal health through prevention, diagnosis, treatment, and rehabilitation.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What are the key aspects of healthcare practices?",
+        "answer": "Healthcare practices involve prevention, diagnosis, treatment, and rehabilitation.",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What is the history of medicine?",
+        "answer": "The practice of medicine dates",
+        "source_path": "/app/rags/papers/data/medicine.pdf",
+        "page": 1
+    },
+    {
+        "question": "What is the symbol on the roof of the temple?",
+        "answer": "The roof is adorned with a symbol of a sun encircled by serpents.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    {
+        "question": "What is the name of the destination?",
+        "answer": "The destination is the Heart of Seraphel.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    {
+        "question": "What is the purpose of their journey?",
+        "answer": "They came for whatever is at the Heart of Seraphel.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 1
+    },
+    {
+        "question": "What warning did the guardian give to the group?",
+        "answer": "The guardian warned that many come with greed, few with wisdom, and they must prove themselves worthy or perish.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 2
+    },
+    {
+        "question": "What did the guardian do after giving the warning?",
+        "answer": "The floor beneath them shifted.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 2
+    },
+    {
+        "question": "What was the guardian's assessment of the group's motivations?",
+        "answer": "The guardian stated that many came with greed, and few with wisdom.",
+        "source_path": "/app/rags/papers/data/story.pdf",
+        "page": 2
+    }
+]

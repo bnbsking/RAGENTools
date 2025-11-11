@@ -1,6 +1,7 @@
-from typing import Dict, Type
+from typing import Dict, Type, Tuple, Union
 import yaml
 
+from pydantic import BaseModel
 from ragentools.common.formatting import get_response_model
 
 
@@ -13,7 +14,11 @@ class ResponseFormatProcessor:
         return response_model
 
 
-def get_prompt_and_response_format(prompt_path: str, replace_dict: dict = {}, response_process: str = "dummy"):
+def get_prompt_and_response_format(
+        prompt_path: str,
+        replace_dict: dict = {},
+        response_process: str = "dummy"
+    ) -> Tuple[str, Union[Dict, Type[BaseModel]]]:
     with open(prompt_path, 'r') as file:
         prompt_cfg = yaml.safe_load(file)
     prompt = prompt_cfg["prompt"]

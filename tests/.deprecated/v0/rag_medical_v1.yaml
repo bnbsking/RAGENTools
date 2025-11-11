@@ -1,9 +1,0 @@
-api:
-  api_key_path: /app/tests/api_keys.yaml
-  api_key_env: GOOGLE_API_KEY
-  model_name: gemini-embedding-001
-
-indices:
-  data_folder: /app/rags/medical/data/
-  save_folder: /app/rags/medical/v1/indices/
-  

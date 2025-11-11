@@ -41,7 +41,6 @@ class RAGAsEvaluator(BaseEvaluator):
                 metric_dict = self.api.run(prompt=prompt, response_format=prompt_cfg["response_format"])
                 metrics[metric] = metric_dict
             self.data[i]["eval"] = metrics
-            print(1)
         json.dump(self.data, open(f"{self.save_folder}/eval.json", 'w', encoding='utf-8'), indent=4)
 
         avg_score = {}

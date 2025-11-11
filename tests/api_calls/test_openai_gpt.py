@@ -1,6 +1,9 @@
+from typing import List
+
+import numpy as np
 import yaml
 
-from ragentools.api_calls.openai_gpt import OpenAIGPTChatAPI
+from ragentools.api_calls.openai_gpt import OpenAIGPTChatAPI, OpenAIEmbeddingAPI
 from ragentools.common.async_main import amain_wrapper
 from ragentools.common.formatting import get_response_model
 from ragentools.prompts import get_prompt_and_response_format
@@ -64,9 +67,37 @@ class TestOpenAIGPTChatAPI:
         print(results, self.api.get_price())
 
 
+class TestOpenAIEmbeddingAPI:
+    @classmethod
+    def setup_class(cls):
+        api_key = yaml.safe_load(open("/app/tests/api_keys.yaml"))["OPENAI_API_KEY"]
+        cls.api = OpenAIEmbeddingAPI(api_key=api_key, model_name="BAAI/bge-multilingual-gemma2")
+        cls.texts = [
+            "The dog barked all night.",
+            "AI is changing the world."
+        ]
+        cls.expect_type = List[List[float]]
+
+    def test_run_batches(self):
+        embeddings = self.api.run_batches(texts=self.texts)
+        assert np.array(embeddings).shape == (len(self.texts), 3584)
+        print(embeddings[0][:3], self.api.get_price())
+
+    def test_arun_batches(self):
+        results = amain_wrapper(self.api.arun_batches, [{"texts": self.texts}])
+        embeddings = results[0]
+        assert np.array(embeddings).shape == (len(self.texts), 3584)
+        print(embeddings[0][:3], self.api.get_price())
+
+
 if __name__ == "__main__":
     obj = TestOpenAIGPTChatAPI()
     obj.setup_class()
     obj.test_run()
     obj.test_arun()
     obj.test_arun_img()
+
+    # obj = TestOpenAIEmbeddingAPI()
+    # obj.setup_class()
+    # obj.test_run_batches()
+    # obj.test_arun_batches()

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Optional
 
 from google import genai
 from google.genai.types import EmbedContentConfig, GenerateContentConfig
@@ -16,19 +16,25 @@ class GoogleGeminiChatAPI(BaseAPI):
             self,
             api_key: str,
             model_name: str,
-            price_csv_path: str = "/app/ragentools/api_calls/prices.csv"
+            price_csv_path: str = "",
+            retry_times: int = 3,
+            retry_sec: int = 5
         ):
         super().__init__(api_key, model_name, price_csv_path)
         self.client = genai.Client(api_key=api_key)
+        self.retry_times = retry_times
+        self.retry_sec = retry_sec
 
     def run(
             self,
             prompt: Union[str, List],
             response_format: dict = None,
             temperature: float = 0.7,
-            retry_times: int = 3,
-            retry_sec: int = 5
+            retry_times: Optional[int] = None,
+            retry_sec: Optional[int] = None
         ) -> Union[str, dict]:  # process 1 query (prompt) at once
+        retry_times = retry_times if retry_times is not None else self.retry_times
+        retry_sec = retry_sec if retry_sec is not None else self.retry_sec
         @retry(stop=stop_after_attempt(retry_times), wait=wait_fixed(retry_sec))
         def _call_api() -> Union[str, dict]:
             if response_format:
@@ -59,9 +65,11 @@ class GoogleGeminiChatAPI(BaseAPI):
             prompt: Union[str, List],
             response_format: dict = None,
             temperature: float = 0.7,
-            retry_times: int = 3,
-            retry_sec: int = 5
+            retry_times: Optional[int] = None,
+            retry_sec: Optional[int] = None
         ) -> Union[str, dict]:  # process 1 query (prompt) at once
+        retry_times = retry_times if retry_times is not None else self.retry_times
+        retry_sec = retry_sec if retry_sec is not None else self.retry_sec
         @retry(stop=stop_after_attempt(retry_times), wait=wait_fixed(retry_sec))
         async def _call_api() -> Union[str, dict]:
             if response_format:
@@ -97,20 +105,26 @@ class GoogleGeminiEmbeddingAPI(BaseAPI):
             self,
             api_key: str,
             model_name: str,
-            price_csv_path: str = "/app/ragentools/api_calls/prices.csv",
-            batch_size: int = 64
+            price_csv_path: str = "",
+            batch_size: int = 64,
+            retry_times: int = 3,
+            retry_sec: int = 5
         ):
         super().__init__(api_key, model_name, price_csv_path)
         self.client = genai.Client(api_key=api_key)
         self.batch_size = batch_size
+        self.retry_times = retry_times
+        self.retry_sec = retry_sec
 
     def run_batches(
             self,
             texts: List[str],
             dim: int = 3072,
-            retry_times: int = 3,
-            retry_sec: int = 5
+            retry_times: Optional[int] = None,
+            retry_sec: Optional[int] = None
         ) -> List[List[float]]:  # process len(texts) at once
+        retry_times = retry_times if retry_times is not None else self.retry_times
+        retry_sec = retry_sec if retry_sec is not None else self.retry_sec
         @retry(stop=stop_after_attempt(retry_times), wait=wait_fixed(retry_sec))
         def _call_api(batch: List[str]) -> List[List[float]]:
             cfg = EmbedContentConfig(
@@ -138,9 +152,11 @@ class GoogleGeminiEmbeddingAPI(BaseAPI):
             self,
             texts: List[str],
             dim: int = 3072,
-            retry_times: int = 3,
-            retry_sec: int = 5
+            retry_times: Optional[int] = None,
+            retry_sec: Optional[int] = None
         ) -> List[List[float]]:  # process len(texts) at once
+        retry_times = retry_times if retry_times is not None else self.retry_times
+        retry_sec = retry_sec if retry_sec is not None else self.retry_sec
         @retry(stop=stop_after_attempt(retry_times), wait=wait_fixed(retry_sec))
         async def _call_api(batch: List[str]) -> List[List[float]]:
             cfg = EmbedContentConfig(
