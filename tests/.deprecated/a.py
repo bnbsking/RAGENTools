@@ -48,7 +48,7 @@ create_vector_index(
 )
 
 query_text = "How do I do similarity search in Neo4j?"
-embedder = MyAPI(api_key="AIzaSyBOyIJpLE83MuhK_uOJmiNQ3gokqGinx24")
+embedder = MyAPI(api_key="")
 vector = embedder.embed_query(query_text)  # Example vector with 3072 dimensions
 
 upsert_vectors(
