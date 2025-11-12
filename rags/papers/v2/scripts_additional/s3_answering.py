@@ -6,9 +6,9 @@ from ragentools.api_calls.google_gemini import (
     GoogleGeminiEmbeddingAPI,
     GoogleGeminiChatAPI
 )
-from ragentools.rags.embedding import CustomEmbedding
+from ragentools.rags.utils.embedding import LangChainEmbedding
 from ragentools.rags.rags import BaseRAG
-from ragentools.rags.vectorstores_union import TwoLevelVectorStoresUnion
+from ragentools.rags.rag_engines import TwoLevelRAGEngine
 from ragentools.rags.rerankers import BaseReranker
 from langchain_community.vectorstores import FAISS
 
@@ -24,13 +24,13 @@ if __name__ == "__main__":
     api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
     api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
     api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
-    embed_model = CustomEmbedding(api=api_emb, dim=3072)
+    embed_model = LangChainEmbedding(api=api_emb, dim=3072)
 
     # RAG
-    vector_store_union = TwoLevelVectorStoresUnion(vector_store_cls=FAISS)
-    vector_store_union.load(cfg_rag["save_folder"], embed_model)
+    rag_engine = TwoLevelRAGEngine(vector_store_cls=FAISS)
+    rag_engine.load(cfg_rag["save_folder"], embed_model)
     rag = BaseRAG(
-        vector_store_union=vector_store_union,
+        rag_engine=rag_engine,
         reranker=BaseReranker()
     )
     

@@ -1,23 +1,23 @@
 from abc import ABC
 
-from ragentools.rags.vectorstores_union import BaseVectorStoresUnion
+from ragentools.rags.rag_engines import BaseRAGEngine
 from ragentools.rags.rerankers import BaseReranker
 
 
 class BaseRAG(ABC):
     def __init__(
             self,
-            vector_store_union: BaseVectorStoresUnion,
+            rag_engine: BaseRAGEngine,
             reranker: BaseReranker
         ):
-        self.vector_store_union = vector_store_union
+        self.rag_engine = rag_engine
         self.reranker = reranker
 
     def index(self, **kwargs) -> None:
-        self.vector_store_union.index(**kwargs)
+        self.rag_engine.index(**kwargs)
     
     def retrieve(self, query: str) -> str:
-        retrieved_chunks = self.vector_store_union.retrieve(query)
+        retrieved_chunks = self.rag_engine.retrieve(query)
         text = self.reranker(retrieved_chunks)
         return text
     

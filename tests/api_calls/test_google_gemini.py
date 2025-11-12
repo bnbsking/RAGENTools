@@ -4,7 +4,7 @@ import numpy as np
 import yaml
 
 from ragentools.api_calls.google_gemini import GoogleGeminiEmbeddingAPI, GoogleGeminiChatAPI
-from ragentools.common.async_main import amain_wrapper
+from ragentools.common.async_funcs import async_executer
 from ragentools.common.formatting import get_response_model
 from ragentools.prompts import get_prompt_and_response_format
 
@@ -34,7 +34,7 @@ class TestGoogleGeminiChatAPI:
                 "response_format": {"ans": {"type": "string"}}
             }
         ]
-        results = amain_wrapper(self.api.arun, args_list)
+        results = async_executer(self.api.arun, args_list)
         #
         expect_response_format_list = [get_response_model(args["response_format"]) for args in args_list]
         assert len(results) == len(expect_response_format_list)
@@ -44,7 +44,7 @@ class TestGoogleGeminiChatAPI:
     
     def test_arun_img(self):
         response_format = {"description": {"type": "string"}}
-        results = amain_wrapper(
+        results = async_executer(
             self.api.arun,
             [
                 {
@@ -88,20 +88,20 @@ class TestGoogleGeminiEmbedAPI:
         print(embeddings[0][:3], self.api.get_price())
 
     def test_arun_batches(self):
-        results = amain_wrapper(self.api.arun_batches, [{"texts": self.texts, "dim": self.dim}])
+        results = async_executer(self.api.arun_batches, [{"texts": self.texts, "dim": self.dim}])
         embeddings = results[0]
         assert np.array(embeddings).shape == (len(self.texts), 3072)
         print(embeddings[0][:3], self.api.get_price())
 
 
 if __name__ == "__main__":
-    # obj = TestGoogleGeminiChatAPI()
-    # obj.setup_class()
+    #obj = TestGoogleGeminiChatAPI()
+    #obj.setup_class()
     # obj.test_run()
     # obj.test_arun()
-    # obj.test_arun_img()
+    #obj.test_arun_img()
 
     obj = TestGoogleGeminiEmbedAPI()
     obj.setup_class()
-    #obj.test_run_batches()
+    obj.test_run_batches()
     obj.test_arun_batches()

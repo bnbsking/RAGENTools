@@ -4,7 +4,7 @@ import yaml
 
 from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI, GoogleGeminiEmbeddingAPI
 from ragentools.api_calls.langchain_runnable import ChatRunnable, EmbRunnable
-from ragentools.common.async_main import amain_wrapper
+from ragentools.common.async_funcs import async_executer
 from ragentools.common.formatting import get_response_model
 from ragentools.prompts import get_prompt_and_response_format
 
@@ -42,7 +42,7 @@ class TestChatRunnable:
                 }
             }
         ]
-        results = amain_wrapper(self.runnable.arun, args_list)
+        results = async_executer(self.runnable.arun, args_list)
         #
         expect_response_format_list = [get_response_model(args["input"]["response_format"]) for args in args_list]
         assert len(results) == len(expect_response_format_list)
@@ -59,7 +59,7 @@ class TestChatRunnable:
                 "data": open("/app/tests/api_calls/dog.jpg", "rb").read()
             }}
         ]
-        results = amain_wrapper(
+        results = async_executer(
             self.runnable.arun,
             [
                 {
@@ -98,7 +98,7 @@ class TestEmbRunnable:
         print(embeddings[0][:3], self.runnable.api.get_price())
 
     def test_arun_batches(self):
-        results = amain_wrapper(self.runnable.arun_batches, [{"input": {"texts": self.texts, "dim": self.dim}}])
+        results = async_executer(self.runnable.arun_batches, [{"input": {"texts": self.texts, "dim": self.dim}}])
         embeddings = results[0]
         assert np.array(embeddings).shape == (len(self.texts), 3072)
         print(embeddings[0][:3], self.runnable.api.get_price())

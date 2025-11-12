@@ -1,4 +1,5 @@
 import os
+
 import pandas as pd
 
 
@@ -13,8 +14,8 @@ class BaseAPI:
             print("Price CSV found, activate price computing")
             df = pd.read_csv(price_csv_path)
             df_row = df[df['model_name'] == model_name]
-            self.input_token_price = df_row["input_token_price"].values[0] / 1e6
-            self.output_token_price = df_row["output_token_price"].values[0] / 1e6
+            self.input_token_price = float(df_row["input_token_price"].values[0]) / 1e6
+            self.output_token_price = float(df_row["output_token_price"].values[0]) / 1e6
         else:
             self.input_token_price = 0.0
             self.output_token_price = 0.0

@@ -98,7 +98,7 @@ pip instal -e .
 following code with the features
 + 1 formatted response: dictionary followed by Google official configuration.
 + 2 image input: followed by Google official configuration
-+ 3 async: call `amain_wrapper(async_func: Callable, arg_list: List[Dict])` to easily harness async program.
++ 3 async: call `async_executer(async_func: Callable, arg_list: List[Dict])` to easily harness async program.
 + 4 retry: based on tencaity, customize retry times and intervals.
 + 5 get price: use `.get_price()` easily. Update the price table in [here](https://github.com/bnbsking/ragentools/blob/main/ragentools/api_calls/prices.csv)
 
@@ -107,7 +107,7 @@ import yaml
 
 from ragentools.api_calls.google_gemini import GoogleGeminiChatAPI
 from ragentools.api_calls.langchain_runnable import ChatRunnable
-from ragentools.common.async_main import amain_wrapper
+from ragentools.common.async_funcs import async_executer
 from ragentools.common.formatting import get_response_model
 from ragentools.prompts import get_prompt_and_response_format
 
@@ -128,7 +128,7 @@ parts = [
         "data": open("/app/tests/api_calls/dog.jpg", "rb").read()
     }}
 ]  # 2 image input
-results = amain_wrapper(  # 3 async
+results = async_executer(  # 3 async
     self.runnable.arun,
     [
         {
@@ -293,7 +293,7 @@ from ragentools.api_calls.google_gemini import (
     GoogleGeminiEmbeddingAPI,
     GoogleGeminiChatAPI,
 )
-from ragentools.indexers.embedding import CustomEmbedding
+from ragentools.indexers.embedding import LangChainEmbedding
 from ragentools.indexers.indexers import two_level_indexing
 from ragentools.parsers.pdf_parser import PDFParser
 
@@ -306,7 +306,7 @@ if __name__ == "__main__":
     api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
     api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
     api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
-    embed_model = CustomEmbedding(api=api_emb, dim=3072)
+    embed_model = LangChainEmbedding(api=api_emb, dim=3072)
 
     # Parsing
     parser = PDFParser(
@@ -392,7 +392,7 @@ from ragentools.api_calls.google_gemini import (
     GoogleGeminiEmbeddingAPI,
     GoogleGeminiChatAPI
 )
-from ragentools.indexers.embedding import CustomEmbedding
+from ragentools.indexers.embedding import LangChainEmbedding
 from ragentools.retrievers.retrievers import TwoLevelRetriever
 
 
@@ -407,7 +407,7 @@ if __name__ == "__main__":
     api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
     api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"])
     api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"])
-    embed_model = CustomEmbedding(api=api_emb, dim=3072)
+    embed_model = LangChainEmbedding(api=api_emb, dim=3072)
 
     # Load two-level retriever
     retriever = TwoLevelRetriever(

@@ -15,9 +15,9 @@ from ragentools.parsers.savers import PDFSaver
 from ragentools.parsers.parsers import BaseParser
 
 from langchain_community.vectorstores import FAISS
-from ragentools.rags.embedding import CustomEmbedding
+from ragentools.rags.utils.embedding import LangChainEmbedding
 from ragentools.rags.rags import BaseRAG
-from ragentools.rags.vectorstores_union import TwoLevelVectorStoresUnion
+from ragentools.rags.rag_engines import TwoLevelRAGEngine
 from ragentools.rags.rerankers import BaseReranker
 
 
@@ -32,7 +32,7 @@ cfg_rag = cfg["rag"]
 api_key = yaml.safe_load(open(cfg_api["api_key_path"]))[cfg_api["api_key_env"]]
 api_emb = GoogleGeminiEmbeddingAPI(api_key=api_key, model_name=cfg_api["emb_model_name"], retry_sec=60)
 api_chat = GoogleGeminiChatAPI(api_key=api_key, model_name=cfg_api["chat_model_name"], retry_sec=60)
-embed_model = CustomEmbedding(api=api_emb, dim=3072)
+embed_model = LangChainEmbedding(api=api_emb, dim=3072)
 
 
 # parser
@@ -49,14 +49,16 @@ parse_result: Iterator[Document] = parser.run(lazy=True)
 
 # rag
 rag = BaseRAG(
-    vector_store_union=TwoLevelVectorStoresUnion(vector_store_cls=FAISS),
+    rag_engine=TwoLevelRAGEngine(
+        vector_store_cls=FAISS,
+        embed_model = embed_model,
+        api_chat = api_chat
+    ),
     reranker=BaseReranker()
 )
 rag.index(
     docs = parse_result,
     coarse_key = "source_path",
-    embed_model = embed_model,
-    api_chat = api_chat,
     save_folder = cfg_rag["save_folder"],
 )
 print(rag.retrieve("What are the key areas that medicine focuses on to ensure well-being?"))

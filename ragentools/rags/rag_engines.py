@@ -4,17 +4,16 @@ import os
 from typing import Dict, Iterable, List, Type
 
 from langchain_core.documents import Document
-
 from ragentools.parsers import Document as Easy_Document
-from ragentools.rags.embedding import CustomEmbedding
-from ragentools.rags.summarizer import recursive_summarization
+from ragentools.rags.utils.embedding import LangChainEmbedding
+from ragentools.rags.utils.summarizer import recursive_summarization
 from ragentools.rags.rerankers import RetrievedChunk
-from ragentools.rags.vectorstores import BaseVectorStoreAdapter
+from ragentools.rags.utils.vectorstore_adapters import BaseVectorStoreAdapter
 
 
-class BaseVectorStoresUnion(ABC):
+class BaseRAGEngine(ABC):
     @abstractmethod
-    def index(self, documents: List[Easy_Document]) -> None:
+    def index(self, docs: List[Easy_Document]) -> None:
         pass
 
     @abstractmethod
@@ -26,9 +25,16 @@ class BaseVectorStoresUnion(ABC):
         raise NotImplementedError
 
 
-class TwoLevelVectorStoresUnion(BaseVectorStoresUnion):
-    def __init__(self, vector_store_cls: Type[BaseVectorStoreAdapter]):
+class TwoLevelRAGEngine(BaseRAGEngine):
+    def __init__(
+            self,
+            vector_store_cls: Type[BaseVectorStoreAdapter],
+            embed_model: LangChainEmbedding,
+            api_chat
+        ):
         self.vector_store_cls = vector_store_cls
+        self.embed_model = embed_model
+        self.api_chat = api_chat
         self.coarse: BaseVectorStoreAdapter = None
         self.fine: Dict[str, BaseVectorStoreAdapter] = {}
     
@@ -36,32 +42,24 @@ class TwoLevelVectorStoresUnion(BaseVectorStoresUnion):
             self,
             fine_chunks: List[Document],
             coarse_level: str,
-            embed_model: CustomEmbedding,
             save_folder: str,
-        ):
+        ) -> None:
         # complete 1 fine-grained index
         save_path = os.path.join(save_folder, "fine", f"{coarse_level}")
-        index = self.vector_store_cls.from_documents(fine_chunks, embedding=embed_model)
+        index = self.vector_store_cls.from_documents(fine_chunks, embedding=self.embed_model)
         self.fine[coarse_level] = index
         if save_folder:
             index.save_local(save_path)
             print(f"Save {len(fine_chunks)} fine chunks to {save_path}")
     
-    def _get_a_coarse_doc(
-            self,
-            fine_chunks: List[Document],
-            coarse_level: str,
-            api_chat,
-        ):
-        summary = recursive_summarization(api_chat, [d.page_content for d in fine_chunks])
+    def _get_a_coarse_doc(self, fine_chunks: List[Document], coarse_level: str) -> Document:
+        summary = recursive_summarization(self.api_chat, [d.page_content for d in fine_chunks])
         return Document(page_content=summary, metadata={"coarse_level": coarse_level})
 
     def index(
             self,
             docs: Iterable[Easy_Document],
             coarse_key: str,
-            embed_model: CustomEmbedding,
-            api_chat,
             save_folder: str = "",
         ):  # Make sure docs are sorted by coarse_level_func
         prev_coarse_level = ""
@@ -71,12 +69,8 @@ class TwoLevelVectorStoresUnion(BaseVectorStoresUnion):
             coarse_level = os.path.basename(str(doc.metadata.get(coarse_key, "dummy")))
             
             if i != 0 and coarse_level != prev_coarse_level:
-                self._complete_a_fine(
-                    acc_fine_chunks, prev_coarse_level, embed_model, save_folder
-                )
-                coarse_doc = self._get_a_coarse_doc(
-                    acc_fine_chunks, prev_coarse_level, api_chat
-                )
+                self._complete_a_fine(acc_fine_chunks, prev_coarse_level, save_folder)
+                coarse_doc = self._get_a_coarse_doc(acc_fine_chunks, prev_coarse_level)
                 acc_coarse_summaries.append(coarse_doc)
                 acc_fine_chunks.clear()
 
@@ -88,22 +82,18 @@ class TwoLevelVectorStoresUnion(BaseVectorStoresUnion):
 
         # save last fine-grained index
         if len(acc_fine_chunks) > 0:
-            self._complete_a_fine(
-                acc_fine_chunks, prev_coarse_level, embed_model, save_folder
-            )
-            coarse_doc = self._get_a_coarse_doc(
-                acc_fine_chunks, prev_coarse_level, api_chat
-            )
+            self._complete_a_fine(acc_fine_chunks, prev_coarse_level, save_folder)
+            coarse_doc = self._get_a_coarse_doc(acc_fine_chunks, prev_coarse_level)
             acc_coarse_summaries.append(coarse_doc)
         
         # complete coarse-grained index
-        index = self.vector_store_cls.from_documents(acc_coarse_summaries, embedding=embed_model)
+        index = self.vector_store_cls.from_documents(acc_coarse_summaries, embedding=self.embed_model)
         self.coarse = index
         if save_folder:
             index.save_local(os.path.join(save_folder, "coarse"))
             print(f"Save {len(acc_coarse_summaries)} coarse summaries to {save_folder}/coarse")
 
-    def load(self, load_folder: str, embed_model: CustomEmbedding,) -> None:
+    def load(self, load_folder: str, embed_model: LangChainEmbedding,) -> None:
         # Load coarse-level index
         coarse_path = os.path.join(load_folder, "coarse")
         self.coarse = self.vector_store_cls.load_local(
@@ -149,4 +139,3 @@ class TwoLevelVectorStoresUnion(BaseVectorStoresUnion):
                     )
             )
         return retrieved_chunks
-    

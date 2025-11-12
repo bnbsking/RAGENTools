@@ -1,7 +1,7 @@
 from typing import List, Tuple
 
 from langchain_core.documents import Document
-from ragentools.rags.embedding import CustomEmbedding
+from ragentools.rags.utils.embedding import LangChainEmbedding
 from ragentools.parsers import Document as Easy_Document
 
 
@@ -14,7 +14,7 @@ class BaseVectorStoreAdapter:
     def from_documents(
             cls,
             documents: List[Easy_Document],
-            embedding: CustomEmbedding
+            embedding: LangChainEmbedding
         ):
         # return is obj as from "langchain_community.vectorstores.FAISS"
         raise NotImplementedError
