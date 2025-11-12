@@ -1,0 +1,21 @@
+prompt: |
+  **Goal:**
+  You are an expert in assessing whether external information retrieval is necessary to answer a query.
+  Given a query, evaluate how essential external retrieval is and provide a score from 0 to 2,
+  along with a brief explanation.
+  
+  **Query:** {{ query }}
+
+  **Score Criteria:**
+  - 0 The query involves common knowledge that can be answered (mostly) without external retrieval.
+  - 1 The query partly depends on external information (about half) to answer accurately.
+  - 2 The query cannot be answered without retrieving external information definitely,
+    so retrieval is definitely necessary.
+
+default_replacements: {}
+
+response_format:
+  score:
+    type: integer
+  explanation:
+    type: string

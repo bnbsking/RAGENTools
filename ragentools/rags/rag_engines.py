@@ -139,3 +139,24 @@ class TwoLevelRAGEngine(BaseRAGEngine):
                     )
             )
         return retrieved_chunks
+
+
+class MSGraphRAGEngine(BaseRAGEngine):
+    def __init__(self, folder: str):
+        self.folder = folder
+
+    def index(self, docs: List[Easy_Document]) -> None:
+        pass
+
+    def load(self) -> None:
+        pass
+
+    def retrieve(self, query: str) -> List[RetrievedChunk]:
+        cmd = f"""
+            graphrag query \
+                --root {self.folder} \
+                --method global \
+                --query "What are the key areas that medicine focuses on to ensure well-being?"
+        """
+        result = os.popen(cmd).read()
+        return [RetrievedChunk(scores=1.0, content=result, meta={})]

@@ -209,3 +209,4 @@ __marimo__/
 # custom
 tests/api_keys.yaml
 poetry.lock
+rags/papers/v3/.env

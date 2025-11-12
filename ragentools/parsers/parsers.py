@@ -23,4 +23,3 @@ class BaseParser:
             self.saver.save(self._generate())
         gen = self._generate()
         return gen if lazy else list(gen)
-    

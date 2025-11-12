@@ -6,5 +6,5 @@ docker run -it --rm \
   -v "${projectPath}:/app" \
   -w /app \
   --name lapp \
-  3.13.9-slim \
+  3.12-slim \
   /bin/bash

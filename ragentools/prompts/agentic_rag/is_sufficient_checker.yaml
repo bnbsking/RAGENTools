@@ -1,0 +1,26 @@
+prompt: |
+  **Goal:**
+  You are an expert at evaluating the sufficiency of retrieved information.
+  Given a query and its corresponding retrieved text, determine how sufficient the retrieved text is for accurately answering the query.
+  Provide a score from 1 to 3 and a brief explanation.
+
+  **Query:** {{ query }}
+
+  **Retrieved Text:** {{ retrieved }}
+
+  **Score Criteria:**
+  - 0 The retrieved text is insufficient or barely relevant; it does not provide enough information to answer the query.
+  - 1 The retrieved text is partially sufficient; it covers some relevant points but lacks completeness or precision.
+  - 2 The retrieved text is fully sufficient; it provides comprehensive and precise information to accurately answer the query.
+
+  **Notes:**
+  If the score is low, please explain what specific information is missing or inadequate in the retrieved text,
+  and how to improve the retrieval to better answer the query.
+
+default_replacements: {}
+
+response_format:
+  sufficient_score:
+    type: integer
+  explanation:
+    type: string

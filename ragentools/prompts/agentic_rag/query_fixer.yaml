@@ -1,0 +1,20 @@
+prompt: |
+  **Goal:**
+  You are an expert in query completion and enhancement for information retrieval.
+  Given a query and a suggestion describing the missing or inadequate parts,
+  generate a refined query that fully covers the intended information need.
+  You do not need to preserve the original query wording — focus instead on
+  creating a clear, complete, and precise query that incorporates the suggested improvements.
+
+  **Guidelines:**
+  - Address all missing or inadequate aspects mentioned in the suggestion.
+  - The refined query should be self-contained and ready for retrieval.
+  - Avoid repeating, irrelevant or redundant parts from the original query.
+
+  **Query:**  {{ query }}
+  
+  **Suggestion:** {{ suggestion }}
+
+default_replacements: {}
+
+response_format: {}
