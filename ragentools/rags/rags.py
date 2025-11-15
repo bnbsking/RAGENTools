@@ -16,8 +16,8 @@ class BaseRAG(ABC):
     def index(self, **kwargs) -> None:
         self.rag_engine.index(**kwargs)
     
-    def retrieve(self, query: str) -> str:
-        retrieved_chunks = self.rag_engine.retrieve(query)
-        text = self.reranker(retrieved_chunks)
+    def retrieve(self, query: str, **kwargs) -> str:
+        retrieved_chunks = self.rag_engine.retrieve(query, **kwargs)
+        text = self.reranker(retrieved_chunks, **kwargs)
         return text
     

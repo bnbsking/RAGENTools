@@ -8,7 +8,7 @@
         {
             "name": "Python Debugger: Current File with Arguments",
             "type": "debugpy",
-            "python": "/root/.cache/pypoetry/virtualenvs/ragentools-9TtSrW0h-py3.13/bin/python",
+            "python": "/root/.cache/pypoetry/virtualenvs/ragentools-9TtSrW0h-py3.12/bin/python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",

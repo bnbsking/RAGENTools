@@ -20,7 +20,7 @@ prompt: |
 default_replacements: {}
 
 response_format:
-  sufficient_score:
+  score:
     type: integer
   explanation:
     type: string

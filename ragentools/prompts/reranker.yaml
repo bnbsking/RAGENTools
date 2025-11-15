@@ -1,0 +1,20 @@
+prompt: |
+  You are an expert at rerank retrieved documents based on their relevance to a given query.
+  Return a list of relevance scores between 0 and 1 (1 = highly relevant, 0 = not relevant) for each retrieved document.
+  You Must follow the order of the retrieved documents as given in the input.
+
+  **Query:** {{ query }}
+  
+  **Retrieved Documents:** {{ retrieved }}
+
+default_replacements: {}
+
+response_format:
+  scores:
+    type: array
+    items:
+      type: number
+  explanation:
+    type: array
+    items:
+      type: string

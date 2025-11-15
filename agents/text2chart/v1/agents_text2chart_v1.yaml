@@ -3,7 +3,7 @@ api:
   api_key_env: GOOGLE_API_KEY
   model_name: gemini-2.0-flash-lite
 
-mode: RUN  # PLOT or RUN
+mode: PLOT  # PLOT or RUN
 data_path: /app/agents/text2chart/data/matplotbench_easy/data.json
 save_folder: /app/agents/text2chart/v1/save/matplotbench_easy/
 

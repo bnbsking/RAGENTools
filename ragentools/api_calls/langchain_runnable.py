@@ -1,6 +1,8 @@
-from typing import List
+from typing import List, Optional
 
 from langchain_core.runnables import Runnable
+
+from ragentools.prompts import get_prompt_and_response_format
 
 
 class ChatRunnable(Runnable):
@@ -8,26 +10,24 @@ class ChatRunnable(Runnable):
     Base on benifits of GoogleGeminiChatAPI/OpenAIGPTChatAPI,
     also allow scalabilty with LangChain.
     """
-    def __init__(self, api, **kwargs):
+    def __init__(self, api, prompt_path: Optional[str] = None):
         # api can be GoogleGeminiChatAPI or OpenAIGPTChatAPI
-        self.api = api(**kwargs)
+        self.api = api
+        if prompt_path:
+            self.prompt, self.response_format = get_prompt_and_response_format(prompt_path)
 
     def run(self, input: dict, config = None) -> dict:
         return self.api.run(
             prompt=input["prompt"],
-            response_format=input["response_format"],
+            response_format=input.get("response_format", None),
             temperature=input.get("temperature", 0.7),
-            retry_times=input.get("retry_times", 3),
-            retry_sec=input.get("retry_sec", 5)
         )
 
     async def arun(self, input: dict, config= None) -> dict:
         return await self.api.arun(
             prompt=input["prompt"],
-            response_format=input["response_format"],
+            response_format=input.get("response_format", None),
             temperature=input.get("temperature", 0.7),
-            retry_times=input.get("retry_times", 3),
-            retry_sec=input.get("retry_sec", 5),
         )
 
     def invoke(self, state: dict, config = None) -> dict:
@@ -36,24 +36,20 @@ class ChatRunnable(Runnable):
 
 
 class EmbRunnable(Runnable):
-    def __init__(self, api, **kwargs):
+    def __init__(self, api):
         # api can be GoogleGeminiEmbeddingAPI or OpenAIGPTEmbeddingAPI
-        self.api = api(**kwargs)
+        self.api = api
 
     def run_batches(self, input: dict, config = None) -> List[List[float]]:
         return self.api.run_batches(
             texts=input["texts"],
-            dim=input["dim"],
-            retry_times=input.get("retry_times", 3),
-            retry_sec=input.get("retry_sec", 5)
+            dim=input["dim"]
         )
 
     async def arun_batches(self, input: dict, config= None) -> List[List[float]]:
         return await self.api.arun_batches(
             texts=input["texts"],
-            dim=input["dim"],
-            retry_times=input.get("retry_times", 3),
-            retry_sec=input.get("retry_sec", 5),
+            dim=input["dim"]
         )
 
     def invoke(self, state: dict, config = None) -> dict:

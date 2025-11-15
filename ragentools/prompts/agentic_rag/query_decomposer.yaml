@@ -9,6 +9,8 @@ prompt: |
   - Do not generate beyond-scoped subquestions that are irrelevant to the original query.
   - If the query is simple and needs no decomposition, return it as a single subquestion.
 
+  **User Query:** {{ query }}
+
 default_replacements: {}
 
 response_format: 

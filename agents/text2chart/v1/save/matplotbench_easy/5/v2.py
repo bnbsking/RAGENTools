@@ -12,4 +12,4 @@ plt.title('Fruit Distribution in a Basket')
 
 # Ensure the circle's proportion
 plt.axis('equal')
-plt.savefig('/app/agents/text2chart/v1/save/matplotbench_easy/5/v1.png'); plt.close()
+plt.savefig('/app/agents/text2chart/v1/save/matplotbench_easy/5/v2.png'); plt.close()

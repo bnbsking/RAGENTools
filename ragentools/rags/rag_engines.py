@@ -93,12 +93,12 @@ class TwoLevelRAGEngine(BaseRAGEngine):
             index.save_local(os.path.join(save_folder, "coarse"))
             print(f"Save {len(acc_coarse_summaries)} coarse summaries to {save_folder}/coarse")
 
-    def load(self, load_folder: str, embed_model: LangChainEmbedding,) -> None:
+    def load(self, load_folder: str) -> None:
         # Load coarse-level index
         coarse_path = os.path.join(load_folder, "coarse")
         self.coarse = self.vector_store_cls.load_local(
             coarse_path,
-            embeddings=embed_model,
+            embeddings=self.embed_model,
             allow_dangerous_deserialization=True
         )
 
@@ -108,7 +108,7 @@ class TwoLevelRAGEngine(BaseRAGEngine):
             name = os.path.basename(fine_folder)
             self.fine[name] = self.vector_store_cls.load_local(
                 fine_folder,
-                embeddings=embed_model,
+                embeddings=self.embed_model,
                 allow_dangerous_deserialization=True
             )
         
@@ -156,7 +156,7 @@ class MSGraphRAGEngine(BaseRAGEngine):
             graphrag query \
                 --root {self.folder} \
                 --method global \
-                --query "What are the key areas that medicine focuses on to ensure well-being?"
+                --query "{query}"
         """
         result = os.popen(cmd).read()
         return [RetrievedChunk(scores=1.0, content=result, meta={})]

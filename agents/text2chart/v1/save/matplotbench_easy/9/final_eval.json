@@ -3,5 +3,5 @@
     "data_consistency": 2,
     "scale_correctness": 2,
     "label_accuracy": 0,
-    "explanation": "The diagram is a line plot, appropriate for the query. The data seems consistent with a sine wave. The x and y-axis limits are correctly set as per the query. However, the diagram is missing axis labels and a title."
+    "explanation": "The diagram is a line plot which is appropriate for the query. The data matches the query as it plots a sine wave. The x and y axis limits match the query. However, there are no axis labels."
 }

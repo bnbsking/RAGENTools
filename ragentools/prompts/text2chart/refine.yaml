@@ -23,14 +23,4 @@ prompt: |
 
 default_replacements: {}
 
-response_format:
-  representative:
-    type: integer
-  data_consistency:
-    type: integer
-  scale_correctness:
-    type: integer
-  label_accuracy:
-    type: integer
-  explanation:
-    type: string
+response_format: {}
