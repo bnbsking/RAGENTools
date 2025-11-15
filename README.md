@@ -52,12 +52,13 @@
             + **TwoLevelRAGEngine**: Coarse-To-Fine approach
                 + fine-level: chunk
                 + coarse-level: file summary (recursive)
-            + **GraphRAG**: Microsoft GraphRAG wrapped to python
+            + **MSGraphRAGEngine**: Microsoft GraphRAG wrapped to python
         + Reranker:
             + Naive reranker: Rank and concat by score
             + **LLM reranker**: Rank by LLM, filter irrelevant and concat finally. 
-    + Based on Grah RAG 
-        + **Agentic RAG** (retrieval only) depends on BaseRAGEngine only
+    + Based on BaseRAG
+        + **Naive RAG** = BaseRAG 
+        + **Agentic RAG** (retrieval only) **depends on BaseRAGEngine** only
 
             ![agentic_rag](pics/agent_rag.png)
     
