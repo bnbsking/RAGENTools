@@ -96,8 +96,17 @@
 
 
 ## Installation
++ Docker image as in test.sh or test.ps1
+
++ Container for testing
 ```bash
-pip instal -e .
+bash env.sh
+source ~/.bashrc
+```
+
++ Directly use
+```bash
+pip install -e .
 ```
 
 ## Example 1 - Call API
